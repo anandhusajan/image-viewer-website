@@ -14,7 +14,7 @@ export default function Home() {
 
       {/* Footer */}
       <footer className="py-4 px-4 sm:px-6 bg-[#1e3a8a] text-white text-center text-sm shrink-0 safe-area-bottom">
-        Miguelito&apos;s Ice Cream
+        Copyright © 2026 – Rambomart. All rights reserved
       </footer>
     </main>
   );

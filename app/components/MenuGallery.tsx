@@ -1,12 +1,19 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const MENU_IMAGES = ["01", "02", "03", "04", "05", "06"] as const;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 4;
 const ZOOM_STEP = 0.25;
+
+function getTouchDistance(touches: TouchList): number {
+  if (touches.length < 2) return 0;
+  const a = touches[0];
+  const b = touches[1];
+  return Math.hypot(b.clientX - a.clientX, b.clientY - a.clientY);
+}
 
 export default function MenuGallery() {
   return (
@@ -14,7 +21,7 @@ export default function MenuGallery() {
       <h2 className="text-xl sm:text-2xl font-bold text-[#1e3a8a] mb-3 sm:mb-6 text-center">
         Menu
       </h2>
-      <div className="max-w-lg mx-auto space-y-4 sm:space-y-6 w-full">
+      <div className="max-w-lg md:max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
         {MENU_IMAGES.map((num, index) => (
           <MenuImage key={num} num={num} index={index} />
         ))}
@@ -26,6 +33,9 @@ export default function MenuGallery() {
 function MenuImage({ num, index }: { num: string; index: number }) {
   const [open, setOpen] = useState(false);
   const [zoom, setZoom] = useState(1);
+  const pinchRef = useRef<{ distance: number; zoom: number } | null>(null);
+  const zoomRef = useRef(zoom);
+  zoomRef.current = zoom;
 
   const zoomIn = useCallback(() => {
     setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP));
@@ -36,6 +46,10 @@ function MenuImage({ num, index }: { num: string; index: number }) {
   const resetAndClose = useCallback(() => {
     setZoom(1);
     setOpen(false);
+  }, []);
+
+  const setZoomClamped = useCallback((value: number) => {
+    setZoom((z) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value)));
   }, []);
 
   const onWheel = useCallback(
@@ -62,6 +76,47 @@ function MenuImage({ num, index }: { num: string; index: number }) {
     };
   }, [open, resetAndClose]);
 
+  const zoomAreaRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open || !zoomAreaRef.current) return;
+    const el = zoomAreaRef.current;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const distance = getTouchDistance(e.touches);
+        pinchRef.current = { distance, zoom: zoomRef.current };
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && pinchRef.current) {
+        e.preventDefault();
+        const distance = getTouchDistance(e.touches);
+        const ratio = distance / pinchRef.current.distance;
+        const newZoom = pinchRef.current.zoom * ratio;
+        setZoomClamped(newZoom);
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      if (e.touches.length < 2) pinchRef.current = null;
+    };
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: false });
+    el.addEventListener("touchmove", handleTouchMove, { passive: false });
+    el.addEventListener("touchend", handleTouchEnd, { passive: true });
+    el.addEventListener("touchcancel", handleTouchEnd, { passive: true });
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+      el.removeEventListener("touchcancel", handleTouchEnd);
+    };
+  }, [open, setZoomClamped]);
+
   return (
     <>
       <button
@@ -70,7 +125,7 @@ function MenuImage({ num, index }: { num: string; index: number }) {
         className="relative w-full rounded-xl overflow-hidden bg-white shadow-md focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:ring-offset-2 active:opacity-90 block text-left"
         aria-label={`Open menu item ${index + 1} full screen`}
       >
-        <div className="relative w-full aspect-[4/3] min-h-[200px]">
+        <div className="relative w-full aspect-[4/3] min-h-[160px] max-h-[72vmin] sm:max-h-[65vh]">
           <Image
             src={`/img/${num}.jpeg`}
             alt={`Miguelito's menu item ${index + 1}`}
@@ -89,21 +144,28 @@ function MenuImage({ num, index }: { num: string; index: number }) {
           aria-label="Full screen menu image"
         >
           <div
-            className="flex-1 overflow-auto flex items-center justify-center p-4 sm:p-8 min-h-0"
+            ref={zoomAreaRef}
+            className="flex-1 overflow-auto flex items-center justify-center p-4 sm:p-8 min-h-0 touch-none"
             onWheel={onWheel}
-            style={{ touchAction: "pan-x pan-y" }}
+            style={{ touchAction: "none" }}
           >
             <div
               className="inline-block transition-transform origin-center"
               style={{ transform: `scale(${zoom})` }}
             >
-              <div className="relative w-[90vw] h-[70vh] sm:w-[85vw] sm:h-[75vh] max-w-4xl max-h-[80vh]">
+              <div
+                className="relative max-w-4xl min-w-[200px] min-h-[180px]"
+                style={{
+                  width: "min(92vw, calc(82vh * 4 / 3))",
+                  height: "min(82vh, calc(92vw * 3 / 4))",
+                }}
+              >
                 <Image
                   src={`/img/${num}.jpeg`}
                   alt={`Miguelito's menu item ${index + 1}`}
                   fill
                   className="object-contain"
-                  sizes="90vw"
+                  sizes="92vw"
                   priority
                 />
               </div>
