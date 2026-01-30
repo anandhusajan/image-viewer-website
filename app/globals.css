@@ -89,6 +89,17 @@ body {
   border-top: 52px solid #e8d5b7;
   margin-top: -4px;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+  animation: cone-visibility 2.8s ease-in-out infinite;
+}
+
+/* Cone visible → hides with scoops → stays hidden → shows again at start of cycle */
+@keyframes cone-visibility {
+  0% { opacity: 1; }
+  53% { opacity: 1; }
+  55% { opacity: 0; }
+  80% { opacity: 0; }
+  82% { opacity: 1; }
+  100% { opacity: 1; }
 }
 
 /* Each scoop has its own keyframe so all 3 go empty at the same time (t=1.5s). */
