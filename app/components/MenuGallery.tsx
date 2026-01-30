@@ -40,7 +40,7 @@ export default function MenuGallery() {
   return (
     <section className="py-4 sm:py-6 px-4 sm:px-6 bg-gray-50 flex-1 min-h-0 w-full max-w-full">
       <h2 className="text-xl sm:text-2xl font-bold text-[#1e3a8a] mb-3 sm:mb-6 text-center">
-        Menu
+        Menu Card
       </h2>
       <div className="max-w-lg md:max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
         {MENU_IMAGES.map((num, index) => (
@@ -255,6 +255,23 @@ function ImageViewer({
       aria-modal="true"
       aria-label="Full screen image viewer"
     >
+      <div className="flex-1 flex items-center justify-center relative min-h-0">
+        <button
+          type="button"
+          onClick={onPrev}
+          className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-10 min-w-[44px] min-h-[44px] rounded-full bg-white/20 text-white text-2xl font-bold flex items-center justify-center hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="Previous image"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          onClick={onNext}
+          className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-10 min-w-[44px] min-h-[44px] rounded-full bg-white/20 text-white text-2xl font-bold flex items-center justify-center hover:bg-white/30 focus:outline-none focus:ring-2 focus:ring-white"
+          aria-label="Next image"
+        >
+          ›
+        </button>
       <div
         ref={zoomAreaRef}
         className={`flex-1 overflow-hidden flex items-center justify-center p-2 sm:p-8 min-h-0 select-none ${zoom > 1 ? "cursor-grab active:cursor-grabbing" : ""}`}
@@ -288,6 +305,7 @@ function ImageViewer({
             />
           </div>
         </div>
+      </div>
       </div>
 
       <div

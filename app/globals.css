@@ -32,6 +32,90 @@ body {
   padding-bottom: max(0.75rem, env(safe-area-inset-bottom, 0px));
 }
 
+/* Ice cream loading animation – empty cone filling */
+.ice-cream-loader {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ice-cream-loader .scoops {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ice-cream-loader .scoop {
+  width: 48px;
+  height: 36px;
+  border-radius: 50% 50% 45% 45%;
+  margin-bottom: -8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform-origin: center bottom;
+  transform: scaleY(0);
+  animation-duration: 2.8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-fill-mode: backwards;
+}
+
+/* 1st scoop (next to cone) = green. Fill order: bottom first, then middle, then top. */
+.ice-cream-loader .scoop-top {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  animation-name: cone-fill-bottom;
+  animation-delay: 0s;
+}
+
+.ice-cream-loader .scoop-middle {
+  background: linear-gradient(135deg, #d4af37 0%, #c9a227 100%);
+  animation-name: cone-fill-middle;
+  animation-delay: 0.5s;
+}
+
+.ice-cream-loader .scoop-bottom {
+  background: linear-gradient(135deg, #fff 0%, #f8f8f8 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  animation-name: cone-fill-top;
+  animation-delay: 1s;
+}
+
+.ice-cream-loader .cone {
+  width: 0;
+  height: 0;
+  border-left: 28px solid transparent;
+  border-right: 28px solid transparent;
+  border-top: 52px solid #e8d5b7;
+  margin-top: -4px;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.15));
+}
+
+/* Each scoop has its own keyframe so all 3 go empty at the same time (t=1.5s). */
+@keyframes cone-fill-bottom {
+  0% { transform: scaleY(0); opacity: 0; }
+  14% { transform: scaleY(1); opacity: 1; }
+  50% { transform: scaleY(1); opacity: 1; }
+  54% { transform: scaleY(0); opacity: 0; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+
+@keyframes cone-fill-middle {
+  0% { transform: scaleY(0); opacity: 0; }
+  14% { transform: scaleY(1); opacity: 1; }
+  36% { transform: scaleY(1); opacity: 1; }
+  40% { transform: scaleY(0); opacity: 0; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+
+@keyframes cone-fill-top {
+  0% { transform: scaleY(0); opacity: 0; }
+  14% { transform: scaleY(1); opacity: 1; }
+  18% { transform: scaleY(1); opacity: 1; }
+  22% { transform: scaleY(0); opacity: 0; }
+  100% { transform: scaleY(0); opacity: 0; }
+}
+
 @media (hover: none) {
   button:active {
     opacity: 0.9;
